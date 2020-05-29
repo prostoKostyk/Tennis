@@ -1,3 +1,4 @@
+this.document.getElementById("version").innerHTML = "version 0.0000002";
 var elPlayer = this.document.getElementById("player");
 var elBall = this.document.getElementById("ball");
 var elField = this.document.getElementById("field");
