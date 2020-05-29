@@ -1,11 +1,16 @@
-this.document.getElementById("version").innerHTML = "version 0.0000002";
-var elPlayer = this.document.getElementById("player");
-var elBall = this.document.getElementById("ball");
-var elField = this.document.getElementById("field");
+document.getElementById("version").innerHTML = "version 0.0000003";
+var elPlayer = document.getElementById("player");
+var elBall = document.getElementById("ball");
+var elField = document.getElementById("field");
+var elBlock = document.getElementById("block");
+var elBlow = document.getElementById("blow");
+var elCount = document.getElementById("count");
 var Game = /** @class */ (function () {
     function Game() {
         this.fail = false;
-        this.speed = 50;
+        this.speed = 25;
+        this.pause = false;
+        this.count = -1;
     }
     return Game;
 }());
@@ -27,7 +32,7 @@ var Player = /** @class */ (function () {
         this.posX = 500;
         this.posY = 1000;
         this.width = 100;
-        this.step = 10;
+        this.step = 20;
         this.posX = posX;
         this.posY = posY;
         elPlayer.style.left = this.posX + "px";
@@ -44,12 +49,37 @@ var Player = /** @class */ (function () {
     };
     return Player;
 }());
+var Block = /** @class */ (function () {
+    function Block(posX, posY) {
+        this.posX = 500;
+        this.posY = 1000;
+        this.color = "black";
+        this.colors = ["red", "blue", "green", "black", "yellow", "pink"];
+        this.posX = posX;
+        this.posY = posY;
+        elBlock.style.left = this.posX + "px";
+        elBlock.style.top = this.posY + "px";
+    }
+    Block.prototype.getRandomCoord = function () {
+        this.posX = (Math.floor(Math.random() * (730 - 5) + 5));
+        this.posY = (Math.floor(Math.random() * (150 - 5) + 5));
+    };
+    Block.prototype.replace = function () {
+        game.count++;
+        elCount.innerHTML = "Счёт: " + game.count;
+        elBlock.style.left = this.posX + "px";
+        elBlock.style.top = this.posY + "px";
+        elBlock.style.backgroundColor = this.colors[(Math.floor(Math.random() * (this.colors.length - 0) + 0))];
+        elBlow.style.display = "none";
+    };
+    return Block;
+}());
 var Ball = /** @class */ (function () {
     function Ball(posX, posY) {
         this.posX = 500;
         this.posY = 1000;
         this.stepX = 5;
-        this.stepY = 5;
+        this.stepY = 3;
         this.directionX = true; // true - право, false - лево
         this.directionY = true; // true - вниз, false - вверх
         this.posX = posX;
@@ -73,82 +103,106 @@ var Ball = /** @class */ (function () {
         this.posY -= this.stepY;
         elBall.style.top = this.posY + "px";
     };
-    Ball.prototype.move = function () {
-        if (game.fail) {
-            game.fail = false;
-            ball.posX = 100;
-            ball.posY = 100;
-            this.directionX = true;
-            this.directionY = true;
-        }
-        // определение направления
-        // проверка удара об игрока
-        if (this.posY + this.stepY >= player.posY && (this.posX > player.posX - 5 && this.posX < player.posX + player.width)) {
-            this.playerTouchX = (ball.posX - player.posX - 55) / 10;
-            this.directionY = false;
-            if (this.playerTouchX >= 0) {
-                this.directionX = true;
-            }
-            else {
-                this.directionX = false;
-            }
-            // изменение шага
-            if (this.playerTouchX < 0) {
-                this.playerTouchX *= -1;
-            }
-            this.stepX = (this.playerTouchX + 1) * 1.75;
-        }
-        // проверка удара об потолок
-        if (this.posY + this.stepY <= 10) {
-            this.directionY = true;
-        }
-        // проверка удара об правую стену
-        if (this.posX + this.stepX >= field.width - 10) {
-            this.directionX = false;
-        }
-        // проверка удара об левую стену
-        if (this.posX - this.stepX <= 10) {
-            this.directionX = true;
-        }
-        // проверка на вылет шара вниз
-        if (this.posY > field.height - 10) {
-            console.log("fail");
-            game.fail = true;
-        }
-        // движение
-        if (this.directionX) {
-            this.goRight();
-        }
-        else {
-            this.goLeft();
-        }
-        if (this.directionY) {
-            this.goDown();
-        }
-        else {
-            this.goUp();
-        }
-    };
     return Ball;
 }());
+function move() {
+    if (game.fail) {
+        game.fail = false;
+        ball.posX = 100;
+        ball.posY = 100;
+        ball.directionX = true;
+        ball.directionY = true;
+        ball.stepX = 5;
+        ball.stepY = 3;
+        game.count = 0;
+        elCount.innerHTML = "Счёт: " + game.count;
+    }
+    // определение направления
+    // проверка удара об игрока
+    if (ball.posY + ball.stepY >= player.posY && (ball.posX > player.posX - 5 && ball.posX < player.posX + player.width)) {
+        ball.playerTouchX = (ball.posX - player.posX - 55) / 10;
+        ball.directionY = false;
+        if (ball.playerTouchX >= 0) {
+            ball.directionX = true;
+        }
+        else {
+            ball.directionX = false;
+        }
+        // изменение шага
+        if (ball.playerTouchX < 0) {
+            ball.playerTouchX *= -1;
+        }
+        ball.stepX = (ball.playerTouchX + 1) * 2.20;
+    }
+    // проверка удара об потолок
+    if (ball.posY + ball.stepY <= 10) {
+        ball.directionY = true;
+    }
+    // проверка удара об правую стену
+    if (ball.posX + ball.stepX >= field.width - 10) {
+        ball.directionX = false;
+    }
+    // проверка удара об левую стену
+    if (ball.posX - ball.stepX <= 10) {
+        ball.directionX = true;
+    }
+    // проверка на вылет шара вниз
+    if (ball.posY > field.height - 10) {
+        console.log("fail");
+        game.fail = true;
+    }
+    // движение
+    if (ball.directionX) {
+        ball.goRight();
+    }
+    else {
+        ball.goLeft();
+    }
+    if (ball.directionY) {
+        ball.goDown();
+    }
+    else {
+        ball.goUp();
+    }
+    if (ball.posX > block.posX && ball.posX < block.posX + 100 && ball.posY > block.posY && ball.posY < block.posY + 12) {
+        elBlow.style.display = "block";
+        block.getRandomCoord();
+        var timerId = setTimeout(function () { return block.replace(); }, 500);
+    }
+}
+function moveRect(e) {
+    if (!game.pause) {
+        switch (e.keyCode) {
+            case 37: // если нажата клавиша влево
+                if (player.posX - player.step > 0) {
+                    player.goLeft();
+                }
+                break;
+            case 39: // если нажата клавиша вправо
+                if (player.posX + player.step < field.width - player.width) {
+                    player.goRight();
+                }
+                break;
+        }
+    }
+}
+function pause() {
+    if (!game.pause) {
+        clearInterval(ballMove);
+        game.pause = true;
+    }
+    else {
+        ballMove = setInterval(function () { return move(); }, game.speed);
+        game.pause = false;
+    }
+}
 var game = new Game();
 var field = new Field(800, 310);
 var player = new Player(300, 290);
 var ball = new Ball(200, 100);
-setInterval(function () { return ball.move(); }, game.speed);
-function moveRect(e) {
-    switch (e.keyCode) {
-        case 37: // если нажата клавиша влево
-            if (player.posX - player.step > 0) {
-                player.goLeft();
-            }
-            break;
-        case 39: // если нажата клавиша вправо
-            if (player.posX + player.step < field.width - player.width) {
-                player.goRight();
-            }
-            break;
-    }
-}
+var ballMove = setInterval(function () { return move(); }, game.speed);
+var block = new Block(200, 100);
+block.getRandomCoord();
+block.replace();
 addEventListener("keydown", moveRect);
 //# sourceMappingURL=app.js.map

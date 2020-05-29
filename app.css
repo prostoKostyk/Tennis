@@ -1,7 +1,26 @@
 .field {
+    margin: 0;
+    left: 0;
     position: absolute;
     border: 1px solid black;
 }
+
+.block {
+    position: absolute;
+    border: 1px solid black;
+    width: 100px;
+    height: 12px;
+    background-color: black;
+}
+
+.blow {
+    display: none;
+    position: relative;
+    top: -40px;
+    width: 100px;
+    height: 100px;
+}
+
 .ball {
     position: absolute;
     border: 1px solid black;
