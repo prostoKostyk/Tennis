@@ -1,0 +1,19 @@
+.field {
+    position: absolute;
+    border: 1px solid black;
+}
+.ball {
+    position: absolute;
+    border: 1px solid black;
+    width: 10px;
+    height: 10px;
+    background-color: black;
+}
+
+.player {
+    position: absolute;
+    border: 1px solid black;
+    width: 100px;
+    height: 10px;
+    background-color: black;
+}
