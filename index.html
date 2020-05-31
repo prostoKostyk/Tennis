@@ -9,15 +9,19 @@
 
 <body>
     <p><div id = "version"></div></p>
-    <p><div id = "count"></div></p>
+   <div class = "count" ><div id = "countPlayer" class = "count__item">0</div><div id = "countBot" class = "count__item"> : 0</div></div>
     <div class="field" id="field">
-        <div id = "block" class = "block">
-            <img id = "blow" class = "blow" src = "https://i.gifer.com/YQDj.gif">
-        </div>
-        <div onclick = "pause()">Pause</div>
+        <div id = "player2" class = "player2"></div>
+        <div onclick = "pause()" class = "pause">Pause</div>
         <div id="ball" class="ball"> </div>
-        <div id="player" class="player"> </div>
+        <div id="player1" class="player1"> </div>
     </div>
+    <label class = "level__label" for = "level">Уровень:</label>
+    <select class = "level" id = "level" onchange="levelChange(); this.blur();">
+        <option value="3.5">Легкий</option>
+        <option value="2.25">Средний</option>
+        <option value="1">Хз</option>
+    </select>
     <script src="app.js"></script>
 </body>
 

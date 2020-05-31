@@ -1,15 +1,22 @@
-document.getElementById("version").innerHTML = "version 0.0000003";
-var elPlayer = document.getElementById("player");
+document.getElementById("version").innerHTML = "version 0.00000004";
+var elPlayer1 = document.getElementById("player1");
+var elPlayer2 = document.getElementById("player2");
 var elBall = document.getElementById("ball");
 var elField = document.getElementById("field");
 let elBlock = document.getElementById("block");
 let elBlow = document.getElementById("blow");
-let elCount = document.getElementById("count");
+let elcountPlayer = document.getElementById("countPlayer");
+elcountPlayer.style.color = window.getComputedStyle(elPlayer1).backgroundColor;
+let elcountBot = document.getElementById("countBot");
+elcountBot.style.color = window.getComputedStyle(elPlayer2).backgroundColor;
+
 class Game {
     fail = false;
-    speed = 25;
+    speed = 40;
     pause = false;
-    count = -1;
+    playerCount = 0;
+    botCount = 0;
+    level = 3.5;
 }
 
 class Field {
@@ -30,57 +37,35 @@ class Player {
     posY = 1000
     width = 100;
     step = 20;
-    constructor(posX: number, posY: number) {
+    player;
+    constructor(posX: number, posY: number, width: number, player) {
         this.posX = posX;
         this.posY = posY;
-        elPlayer.style.left = this.posX + "px";
-        elPlayer.style.top = this.posY + "px";
-        elPlayer.style.width = this.width + "px";
+        this.width = width;
+        this.player = player;
+        this.player.style.left = this.posX + "px";
+        this.player.style.top = this.posY + "px";
+        this.player.style.width = this.width + "px";
     }
     goLeft() {
         this.posX -= this.step;
-        elPlayer.style.left = this.posX + "px";
+        this.player.style.left = this.posX + "px";
     }
     goRight() {
         this.posX += this.step;
-        elPlayer.style.left = this.posX + "px";
-    }
-}
-
-class Block {
-    posX = 500;
-    posY = 1000
-    color = "black"
-    colors = ["red", "blue", "green", "black", "yellow", "pink"]
-    constructor(posX: number, posY: number) {
-        this.posX = posX;
-        this.posY = posY;
-        elBlock.style.left = this.posX + "px";
-        elBlock.style.top = this.posY + "px";
-    }
-    getRandomCoord() {
-        this.posX = (Math.floor(Math.random() * (730- 5) + 5));
-        this.posY = (Math.floor(Math.random() * (150 - 5) + 5));
-    }
-
-    replace () {
-        game.count++;
-        elCount.innerHTML = "Счёт: " + game.count;
-        elBlock.style.left = this.posX + "px";
-        elBlock.style.top = this.posY + "px";
-        elBlock.style.backgroundColor = this.colors[(Math.floor(Math.random() * (this.colors.length - 0) + 0))];
-        elBlow.style.display = "none"
+        this.player.style.left = this.posX + "px";
     }
 }
 
 class Ball {
     posX = 500;
     posY = 1000
-    stepX = 5;
+    stepX = 3;
     stepY = 3;
     directionX = true; // true - право, false - лево
     directionY = true; // true - вниз, false - вверх
-    playerTouchX;
+    player1TouchX;
+    player2TouchX;
     constructor(posX: number, posY: number) {
         this.posX = posX;
         this.posY = posY;
@@ -114,28 +99,43 @@ function move() {
         ball.directionY = true;
         ball.stepX = 5;
         ball.stepY = 3;
-        game.count = 0;
-        elCount.innerHTML = "Счёт: " + game.count;
+        elcountPlayer.innerHTML = " " + game.playerCount;
+        elcountBot.innerHTML = " : " + game.botCount;
     }
+
     // определение направления
-    // проверка удара об игрока
-    if (ball.posY + ball.stepY >= player.posY && (ball.posX > player.posX - 5 && ball.posX < player.posX + player.width)) {
-        ball.playerTouchX = (ball.posX - player.posX - 55) / 10;
+    // проверка удара об 1 игрока
+    if (ball.posY + ball.stepY >= player1.posY - 5 && (ball.posX > player1.posX - 5 && ball.posX < player1.posX + player1.width)) {
+        ball.player1TouchX = (ball.posX - player1.posX - 55) / 10;
         ball.directionY = false;
-        if (ball.playerTouchX >= 0) {
+        if (ball.player1TouchX >= 0) {
             ball.directionX = true;
         } else {
+            ball.player1TouchX *= -1;
             ball.directionX = false;
         }
         // изменение шага
-        if (ball.playerTouchX < 0) {
-            ball.playerTouchX *= -1;
-        }
-        ball.stepX = (ball.playerTouchX + 1) * 2.20;
+        ball.stepX = (ball.player1TouchX + 1) * 2.20;
     }
-    // проверка удара об потолок
-    if (ball.posY + ball.stepY <= 10) {
+
+    // проверка удара об 2 игрока
+    if (ball.posY + ball.stepY <= player2.posY + 15 && ball.posY + ball.stepY >= player2.posY && (ball.posX > player2.posX - 1 && ball.posX < player2.posX + player2.width)) {
+        ball.player2TouchX = (ball.posX - player2.posX - 55) / 10;
         ball.directionY = true;
+        if (ball.player2TouchX >= 0) {
+            ball.directionX = true;
+        } else {
+            ball.player2TouchX *= -1;
+            ball.directionX = false;
+        }
+        // изменение шага
+        ball.stepX = (ball.player2TouchX + 1) * 2.20;
+    }
+
+    // проверка вылета за потолок об потолок
+    if (ball.posY + ball.stepY <= 10) {
+        game.playerCount++;
+        game.fail = true;
     }
     // проверка удара об правую стену
     if (ball.posX + ball.stepX >= field.width - 10) {
@@ -147,7 +147,7 @@ function move() {
     }
     // проверка на вылет шара вниз
     if (ball.posY > field.height - 10) {
-        console.log("fail");
+        game.botCount++;
         game.fail = true;
     }
 
@@ -162,24 +162,28 @@ function move() {
     } else {
         ball.goUp();
     }
-    if (ball.posX > block.posX && ball.posX < block.posX + 100 && ball.posY > block.posY && ball.posY < block.posY + 12 ) {
-        elBlow.style.display = "block";
-        block.getRandomCoord();
-        let timerId = setTimeout(() => block.replace(), 500);
-    }
 }
 
+function botMove() {
+    console.log(player2.posX);
+    if (ball.posX > player2.posX + player2.width - 10 && player2.posX + player2.step < field.width - 100) {
+        player2.goRight();
+    }
+    if (ball.posX < player2.posX + 10 && player2.posX - player2.step > 0) {
+        player2.goLeft();
+    }
+}
 function moveRect(e) {
     if (!game.pause) {
         switch (e.keyCode) {
             case 37:  // если нажата клавиша влево
-                if (player.posX - player.step > 0) {
-                    player.goLeft();
+                if (player1.posX - player1.step > 0) {
+                    player1.goLeft();
                 }
                 break;
             case 39:   // если нажата клавиша вправо
-                if (player.posX + player.step < field.width - player.width) {
-                    player.goRight();
+                if (player1.posX + player1.step < field.width - player1.width) {
+                    player1.goRight();
                 }
                 break;
         }
@@ -188,21 +192,33 @@ function moveRect(e) {
 
 function pause() {
     if (!game.pause) {
+        clearInterval(player2Move);
         clearInterval(ballMove);
         game.pause = true;
     } else {
         ballMove = setInterval(() => move(), game.speed);
+        player2Move = setInterval(() => botMove(), game.speed * game.level);
         game.pause = false;
     }
 }
 
+function levelChange() {
+    let level = this.document.getElementById("level");
+    game.level = +level.value;
+    clearInterval(player2Move);
+    player2Move = setInterval(() => botMove(), game.speed * game.level);
+    game.fail = true;
+    game.botCount = 0;
+    game.playerCount = 0;
+    elcountPlayer.innerHTML = " " + game.playerCount;
+    elcountBot.innerHTML = " : " + game.botCount;
+}
 let game = new Game();
 let field = new Field(800, 310);
-let player = new Player(300, 290);
+let player1 = new Player(295, 290, 100, elPlayer1);
+let player2 = new Player(300, 20, 100, elPlayer2);
 let ball = new Ball(200, 100)
 let ballMove = setInterval(() => move(), game.speed);
-let block = new Block(200, 100);
-block.getRandomCoord();
-block.replace();
+let player2Move = setInterval(() => botMove(), game.speed * game.level);
 addEventListener("keydown", moveRect);
 

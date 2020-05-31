@@ -5,6 +5,11 @@
     border: 1px solid black;
 }
 
+.pause {
+    font-size: 22px;
+    cursor: pointer;
+}
+
 .block {
     position: absolute;
     border: 1px solid black;
@@ -29,10 +34,47 @@
     background-color: black;
 }
 
-.player {
+.player1 {
     position: absolute;
     border: 1px solid black;
     width: 100px;
     height: 10px;
     background-color: black;
+}
+
+.player2 {
+    position: absolute;
+    border: 1px solid black;
+    width: 100px;
+    height: 10px;
+    background-color: red;
+}
+.count {
+    margin-left: 480px;
+}
+.count__item {
+    position: relative;
+    float: left;
+    font: 30px sans-serif;
+}
+
+.level {
+    margin-top: 350px;
+    position: relative;
+    background-color: rgba(0, 43, 236, 0.671);
+    color: white;
+    width: 200px;
+    height: 44px;
+    border: none;
+    font-size: 20px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+    outline: none;
+}
+
+.level__label {
+    margin-top: 355px;
+    margin-right: 20px;
+    font-size: 30px;
+    position: relative;
+    float: left;
 }
